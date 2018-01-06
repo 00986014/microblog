@@ -1,0 +1,39 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+<table>
+    <tr valign="top">
+        <td><img src="{{user.avatar(128)}}"></td>
+        <td>
+            <h1>User: {{user.nickname}}</h1>
+            {% if user.about_me %}<p>{{user.about_me}}</p>{% endif %}
+            {% if user.last_seen %}<p><i>Last seen on: {{user.last_seen}}</i></p>{% endif %}
+            <p>
+			{% if user.id == g.user.id %}
+                <a href="{{url_for('followerlist', nickname = user.nickname)}}">{{user.followers.count()}} followers</a>
+				| <a href="{{url_for('followedlist', nickname = user.nickname)}}">{{user.followed.count()}} followed</a>
+                | <a href="{{url_for('edit')}}">Edit your profile</a>
+				| <a href="{{url_for('change_password')}}">Change Password</a>
+            {% elif not g.user.is_following(user) %}
+                <a href="{{url_for('follow', nickname = user.nickname)}}">Follow</a>
+            {% else %}
+                <a href="{{url_for('unfollow', nickname = user.nickname)}}">Unfollow</a>
+            {% endif %}
+            </p>
+        </td>
+    </tr>
+</table>
+<hr>
+<!-- followed is a Paginate object -->
+{% for followed in followed_list.items %}
+<table>
+    <tr valign="top">
+        <td><img src="{{followed.avatar(50)}}"></td><td><i><a href="{{url_for('user', nickname = followed.nickname)}}">{{followed.nickname}}</i></td></a>
+    </tr>
+</table> 
+<div><a href="{{ url_for('unfollow', nickname = followed.nickname) }}">{{ ('Unfollow') }}</a></div>
+{% endfor %}
+{% if followed_list.has_prev %}<a href="{{ url_for('followedlist', page = followed_list.prev_num) }}"><< Previous </a>{% else %}<< Previous {% endif %} |
+{% if followed_list.has_next %}<a href="{{ url_for('followedlist', page = followed_list.next_num) }}">Next >></a>{% else %}Next >>{% endif %}
+{% endblock %}
